@@ -1,3 +1,6 @@
+# Demo 07: Stateful Conv1d with stride-based downsampling.
+# Shows how strided layers increase receptive field and constrain minimum streaming buffer size.
+
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -49,6 +52,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     layer0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=1)
@@ -76,6 +80,7 @@ if __name__ == '__main__':
     y3 = []
     y4 = []
 
+    # Stream fixed-size chunks; each chunk must align with cumulative downsampling.
     for i in tqdm(range(num_buffers)):
         x_i = x[:, :, i * buffer_size:(i + 1) * buffer_size]
         y0_i = layer0(x_i)

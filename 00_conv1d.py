@@ -1,3 +1,6 @@
+# Demo 00: Single Conv1d impulse response.
+# Shows how one valid 1D convolution transforms a centered impulse.
+
 import torch
 import torch.nn as nn
 
@@ -38,6 +41,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     layer0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size)

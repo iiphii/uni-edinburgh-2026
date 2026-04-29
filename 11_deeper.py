@@ -1,3 +1,6 @@
+# Demo 11: Deeper U-Net-style streaming model.
+# Scales the encoder-decoder depth and channel count to demonstrate a larger receptive field.
+
 import numpy as np
 import soundfile as sf
 import torch
@@ -87,6 +90,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     down0 = Conv1d(in_channels=in_channels, out_channels=hidden_channels, kernel_size=kernel_size, stride=1)
@@ -132,6 +136,7 @@ if __name__ == '__main__':
 
     # let's process 256 samples at a time - simulating low-latency inference
     # the minimum we can use is 2^8 = 256
+    # Buffer size must be divisible by the total downsampling factor across 8 stride-4 stages.
     buffer_size = 4**8
     num_buffers = num_samples // buffer_size
 
@@ -162,10 +167,10 @@ if __name__ == '__main__':
         y2_i = down2(y1_i)
         y3_i = down3(y2_i)
         y4_i = down4(y3_i)
-        y5_i = down4(y4_i)
-        y6_i = down4(y5_i)
-        y7_i = down4(y6_i)
-        y8_i = down4(y7_i)
+        y5_i = down5(y4_i)
+        y6_i = down6(y5_i)
+        y7_i = down7(y6_i)
+        y8_i = down8(y7_i)
 
         z8_i = up8(y8_i)
         z7_i = up7(z8_i)

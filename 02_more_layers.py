@@ -1,3 +1,6 @@
+# Demo 02: Deeper stack of Conv1d layers.
+# Visualizes how repeated valid convolutions keep widening the effective receptive field.
+
 import torch
 import torch.nn as nn
 
@@ -38,6 +41,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     layer0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size)
@@ -54,7 +58,7 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
     x = x.squeeze().cpu().numpy()
-    y0 = y1.squeeze().detach().cpu().numpy()
+    y0 = y0.squeeze().detach().cpu().numpy()
     y1 = y1.squeeze().detach().cpu().numpy()
     y2 = y2.squeeze().detach().cpu().numpy()
     y3 = y3.squeeze().detach().cpu().numpy()

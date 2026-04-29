@@ -1,3 +1,6 @@
+# Demo 03: Dilated Conv1d stack.
+# Demonstrates receptive-field expansion via dilation without increasing kernel size.
+
 import torch
 import torch.nn as nn
 
@@ -38,6 +41,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     layer0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, dilation=1)
@@ -50,7 +54,7 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
     x = x.squeeze().cpu().numpy()
-    y0 = y1.squeeze().detach().cpu().numpy()
+    y0 = y0.squeeze().detach().cpu().numpy()
     y1 = y1.squeeze().detach().cpu().numpy()
     y2 = y2.squeeze().detach().cpu().numpy()
 

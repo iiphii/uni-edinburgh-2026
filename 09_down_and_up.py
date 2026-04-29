@@ -1,3 +1,6 @@
+# Demo 09: U-Net-style downsampling then upsampling path.
+# Builds an encoder-decoder chain and inspects its impulse response in streaming mode.
+
 import numpy as np
 import soundfile as sf
 import torch
@@ -86,6 +89,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     down0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=1)
@@ -114,7 +118,6 @@ if __name__ == '__main__':
     up4.reset_state(batch_size=batch_size, dtype=dtype, device=device)
 
     # let's process 16 samples at a time - simulating low-latency inference
-    # here we can use any buffer size we want as we're only upsampling
     buffer_size = 16
     num_buffers = num_samples // buffer_size
 
@@ -139,6 +142,7 @@ if __name__ == '__main__':
         y4_i = down4(y3_i)
 
         z4_i = up4(y4_i)
+        # Decoder mirrors encoder order to recover time resolution.
         z3_i = up3(z4_i)
         z2_i = up2(z3_i)
         z1_i = up1(z2_i)

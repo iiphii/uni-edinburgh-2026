@@ -1,3 +1,6 @@
+# Demo 12: Training the stateful U-Net-style model on real audio pairs.
+# Uses segment-wise streaming training so inference-time state handling is preserved during optimization.
+
 import numpy as np
 import soundfile as sf
 import torch
@@ -172,6 +175,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.Adam(params=layers.parameters())
 
     num_iterations = 10000
+    # Each iteration trains on contiguous wrapped segments while preserving recurrent state.
     for i in range(num_iterations):
         # construct training batch
         X = []
@@ -217,6 +221,7 @@ if __name__ == '__main__':
         # mean square error
         loss = (Y - Z0).square().mean()
 
+        # Backprop through this iteration, then detach recurrent buffers to truncate history.
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()

@@ -1,3 +1,6 @@
+# Demo 10: U-Net with skip connections.
+# Adds encoder-to-decoder feature concatenations and visualizes their effect on the response.
+
 import numpy as np
 import soundfile as sf
 import torch
@@ -86,6 +89,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     down0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=1)
@@ -139,6 +143,7 @@ if __name__ == '__main__':
         y4_i = down4(y3_i)
 
         z4_i = up4(y4_i)
+        # Concatenate encoder features with decoder activations at matching scale.
         z3_i = up3(torch.concatenate([y3_i, z4_i], dim=1))
         z2_i = up2(torch.concatenate([y2_i, z3_i], dim=1))
         z1_i = up1(torch.concatenate([y1_i, z2_i], dim=1))

@@ -1,3 +1,6 @@
+# Demo 05: Stateful causal Conv1d layers.
+# Introduces ring-buffer state so chunked processing matches causal full-stream behavior.
+
 import torch
 import torch.nn as nn
 
@@ -22,6 +25,7 @@ class Conv1d(nn.Module):
             stride=stride,
             bias=bias,
         )
+        # Keep exactly the past context needed for a causal valid convolution.
         self.ring_buffer_length = (kernel_size - 1) * dilation
 
     def reset_state(self, batch_size: int, dtype: torch.dtype, device: torch.device) -> None:
@@ -48,6 +52,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     layer0 = Conv1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, dilation=1)
@@ -71,7 +76,7 @@ if __name__ == '__main__':
 
     import matplotlib.pyplot as plt
     x = x.squeeze().cpu().numpy()
-    y0 = y1.squeeze().detach().cpu().numpy()
+    y0 = y0.squeeze().detach().cpu().numpy()
     y1 = y1.squeeze().detach().cpu().numpy()
     y2 = y2.squeeze().detach().cpu().numpy()
     y3 = y3.squeeze().detach().cpu().numpy()

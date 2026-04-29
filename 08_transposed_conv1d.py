@@ -1,3 +1,6 @@
+# Demo 08: Stateful ConvTranspose1d upsampling.
+# Demonstrates overlap-add style buffering needed for causal transposed convolutions.
+
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -23,6 +26,7 @@ class ConvTranspose1d(nn.Module):
             stride=stride,
             bias=bias,
         )
+        # Cache pending overlap samples that need to be added to the next chunk.
         self.ring_buffer_length = (kernel_size - 1) * dilation + 1 - stride
 
     def reset_state(self, batch_size: int, dtype: torch.dtype, device: torch.device) -> None:
@@ -51,6 +55,7 @@ if __name__ == '__main__':
     device = 'cpu'
 
     x = torch.zeros(batch_size, in_channels, num_samples, dtype=dtype, device=device)
+    # Use a centered impulse to expose each model's temporal response.
     x[:, :, num_samples // 2] = 1.0
 
     layer0 = ConvTranspose1d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=1)
